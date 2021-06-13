@@ -20,18 +20,13 @@ def avg_time_elapsed(method, iterations, *argv):
     return np.mean(elapsed_time), np.std(elapsed_time)
 
 
-def standard_solver(A, x0, b):
-    linear_solver = np.linalg.solve if isinstance(A, np.ndarray) else spsolve
-    start = process_time()
-    x = linear_solver(A, b)
-    return x, None, None, process_time() - start
-
-
 print('\nAvg Time Elapsed\n')
 
 m, sd = avg_time_elapsed(ConjugateGradient, 10, A, x0, b)
 print('CG   {:.2e} ± {:.2e}'.format(m, sd))
 
+
+# Try using diagonal as preconditioner
 D = sps.diags(A.diagonal(), format='csr')
 m, sd = avg_time_elapsed(PreconditionedConjugateGradient, 10, A, x0, b, D)
 print('PCGd {:.2e} ± {:.2e}'.format(m, sd))
