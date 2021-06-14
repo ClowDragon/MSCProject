@@ -1,3 +1,4 @@
+import numpy as np
 import scipy.sparse as sps
 
 from Meeting01.Copy_of_ReadInIASI import readIASIfun
@@ -37,3 +38,11 @@ print('PCG diagonal {:.2e} ± {:.2e}'.format(m, sd))
 T = sps.csr_matrix(facto_cholesky_incomplete(A))
 m, sd = avg_time_elapsed(PreconditionedConjugateGradient, 10, A, x0, b, T)
 print('PCG cholesky {:.2e} ± {:.2e}'.format(m, sd))
+
+# Try ridge regression
+gamma = np.arange(1, 10)
+for g in gamma:
+    RR = A + sps.csr_matrix(g * np.identity(n))
+    m, sd = avg_time_elapsed(PreconditionedConjugateGradient, 10, A, x0, b, RR)
+    print('PCG ridge with gamma={} {:.2e} ± {:.2e}'.format(g, m, sd))
+

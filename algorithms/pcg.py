@@ -45,4 +45,5 @@ def PreconditionedConjugateGradient(A, x0, b, P, tol=1.e-10, max_iter=200):
         p = z + beta * p
         res.append(np.linalg.norm(r) / bnorm)
         k += 1
+    # k is the number of iterations, res record the residual norm
     return x, k, np.array(res), process_time() - start
