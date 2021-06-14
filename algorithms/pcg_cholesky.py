@@ -1,5 +1,7 @@
 import numpy as np
 
+from time import process_time
+
 
 def calc_ti(A, T, i):
     """
@@ -52,11 +54,11 @@ def facto_cholesky_incomplete_REC(A, T, i):
     out : itself with a call on next index
     """
 
-    if i == len(A):
+    if i == A.shape[0]:
         return T
     T[i, i] = calc_ti(A, T, i)
 
-    for j in range(i + 1, len(A)):
+    for j in range(i + 1, A.shape[0]):
         if A[j, i] != 0:
             T[j, i] = calc_tji(A, T, i, j)
     return facto_cholesky_incomplete_REC(A, T, i + 1)
@@ -74,7 +76,7 @@ def facto_cholesky_incomplete(A):
     out : the matrix of the incomplete Cholesky factorization
     """
 
-    T = np.zeros([len(A), len(A)])
+    T = np.zeros([A.shape[0], A.shape[0]])
     return facto_cholesky_incomplete_REC(A, T, 0)
 
 
@@ -152,7 +154,7 @@ def solve(T, Tt, r):
     return z
 
 
-def pcg_cholesky(A, b, x):
+def pcg_cholesky(A, b, x, tol=1.e-10, max_iter=200):
     """
     conjugate_gradient_preconditioned(...)
     returns the solution to the equation Ax = b
@@ -171,6 +173,7 @@ def pcg_cholesky(A, b, x):
     ----------------
     O(n**2)
     """
+    start = process_time()
     r = b - A.dot(x)  # The inverse of the gradient of f
     T = facto_cholesky_incomplete(A)  # Incomplete Cholesky preconditionner
     Tt = T.transpose()
@@ -178,17 +181,18 @@ def pcg_cholesky(A, b, x):
     z = solve(T, Tt, r)
     p = z  # First direction of the being built base
     rsold = (r.transpose()).dot(z)
-
-    for i in range(1, 10 ** 6):
+    k = 0
+    for i in range(max_iter):
         Ap = A.dot(p)
         alpha = rsold / np.dot(np.transpose(p), Ap)  # Coordinate of the solution in the base
         x = x + alpha * p  # Variable that converges towards the solution
         r = r - alpha * Ap  # New gradient
         z = solve(T, Tt, r)
         rsnew = np.dot(np.transpose(r), z)
-        if np.sqrt(rsnew[0][0]) < 10 ** (-10):
+        if np.sqrt(rsnew[0][0]) < tol:
+            k = i+1
             break
 
         p = z + (rsnew / rsold) * p  # New direction
         rsold = rsnew
-    return x
+    return x, k, 1, process_time() - start

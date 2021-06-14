@@ -2,6 +2,7 @@ import scipy.sparse as sps
 
 from Meeting01.Copy_of_ReadInIASI import readIASIfun
 from algorithms.pcg import *
+from algorithms.pcg_cholesky import facto_cholesky_incomplete
 
 CorrSub, CovSub, sigmaSub = readIASIfun()
 
@@ -29,4 +30,10 @@ print('CG   {:.2e} ± {:.2e}'.format(m, sd))
 # Try using diagonal as preconditioner
 D = sps.diags(A.diagonal(), format='csr')
 m, sd = avg_time_elapsed(PreconditionedConjugateGradient, 10, A, x0, b, D)
-print('PCGd {:.2e} ± {:.2e}'.format(m, sd))
+print('PCG diagonal {:.2e} ± {:.2e}'.format(m, sd))
+
+
+# Try using incomplete cholesky as preconditioner
+T = sps.csr_matrix(facto_cholesky_incomplete(A))
+m, sd = avg_time_elapsed(PreconditionedConjugateGradient, 10, A, x0, b, T)
+print('PCG cholesky {:.2e} ± {:.2e}'.format(m, sd))
