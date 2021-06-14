@@ -1,4 +1,4 @@
-import numpy as np
+import matplotlib.pyplot as plt
 import scipy.sparse as sps
 
 from Meeting01.Copy_of_ReadInIASI import readIASIfun
@@ -40,9 +40,15 @@ m, sd = avg_time_elapsed(PreconditionedConjugateGradient, 10, A, x0, b, T)
 print('PCG cholesky {:.2e} ± {:.2e}'.format(m, sd))
 
 # Try ridge regression
-gamma = np.arange(1, 10)
+gamma = np.arange(0.001, 0.2, 0.001)
+record = []
 for g in gamma:
-    RR = A + sps.csr_matrix(g * np.identity(n))
+    RR = sps.csr_matrix(g * np.identity(n))
     m, sd = avg_time_elapsed(PreconditionedConjugateGradient, 10, A, x0, b, RR)
-    print('PCG ridge with gamma={} {:.2e} ± {:.2e}'.format(g, m, sd))
+    record.append(m)
 
+g = np.min(record)
+
+RR = sps.csr_matrix(g * np.identity(n))
+m, sd = avg_time_elapsed(PreconditionedConjugateGradient, 10, A, x0, b, RR)
+print('PCG ridge with gamma={} {:.2e} ± {:.2e}'.format(g, m, sd))

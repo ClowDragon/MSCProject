@@ -151,7 +151,9 @@ def readIASIfun():
     return CorrSub, CovSub, sigmaSub
 
 
+'''
 CorrSub, CovSub, sigmaSub = readIASIfun()
+
 
 df_cm = pd.DataFrame(CorrSub, range(137), range(137))
 # plt.figure(figsize=(10,7))
@@ -168,4 +170,5 @@ ax.set_xticklabels(
     horizontalalignment='right'
 )
 
-#plt.show()
+plt.show()
+'''
