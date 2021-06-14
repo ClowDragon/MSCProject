@@ -168,4 +168,4 @@ ax.set_xticklabels(
     horizontalalignment='right'
 )
 
-plt.show()
+#plt.show()
