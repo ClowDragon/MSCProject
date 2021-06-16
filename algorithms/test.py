@@ -15,10 +15,12 @@ x0 = np.random.rand(n)
 
 def avg_time_elapsed(method, iterations, *argv):
     elapsed_time = np.empty(iterations)
+    number_of_iterations = np.empty(iterations)
     for i in range(iterations):
-        _, _, _, t = method(*argv)
+        _, iteration, _, t = method(*argv)
         elapsed_time[i] = t
-    return np.mean(elapsed_time), np.std(elapsed_time)
+        number_of_iterations[i] = iteration
+    return np.mean(elapsed_time), np.std(elapsed_time), np.mean(number_of_iterations)
 
 
 print('\nAvg Time Elapsed of computing the preconditioner\n')
@@ -42,7 +44,7 @@ gamma = np.arange(0.001, 0.2, 0.001)
 record = []
 for g in gamma:
     RR = sps.csr_matrix(g * np.identity(n))
-    m, sd = avg_time_elapsed(PreconditionedConjugateGradient, 10, A, x0, b, RR)
+    m, sd, k = avg_time_elapsed(PreconditionedConjugateGradient, 10, A, x0, b, RR)
     record.append(m)
 
 g = np.min(record)
@@ -53,20 +55,20 @@ print('\n Time for compute ridge is: {}\n'.format(end))
 
 print('\nAvg Time Elapsed of solving the system\n')
 # Basic cg method
-m, sd = avg_time_elapsed(ConjugateGradient, 10, A, x0, b)
-print('CG   {:.2e} ± {:.2e}'.format(m, sd))
+m, sd, k = avg_time_elapsed(ConjugateGradient, 10, A, x0, b)
+print('CG with {} iterations:  {:.2e} ± {:.2e}'.format(k, m, sd))
 
 
 # Try using diagonal as preconditioner
-m, sd = avg_time_elapsed(PreconditionedConjugateGradient, 10, A, x0, b, D)
-print('PCG diagonal {:.2e} ± {:.2e}'.format(m, sd))
+m, sd, k = avg_time_elapsed(PreconditionedConjugateGradient, 10, A, x0, b, D)
+print('PCG diagonal with {} iterations: {:.2e} ± {:.2e}'.format(k, m, sd))
 
 
 # Try using incomplete cholesky as preconditioner
-m, sd = avg_time_elapsed(PreconditionedConjugateGradient, 10, A, x0, b, T)
-print('PCG cholesky {:.2e} ± {:.2e}'.format(m, sd))
+m, sd, k = avg_time_elapsed(PreconditionedConjugateGradient, 10, A, x0, b, T)
+print('PCG cholesky with {} iterations: {:.2e} ± {:.2e}'.format(k, m, sd))
 
 
 # Try ridge regression
-m, sd = avg_time_elapsed(PreconditionedConjugateGradient, 10, A, x0, b, RR)
-print('PCG ridge with gamma={} {:.2e} ± {:.2e}'.format(g, m, sd))
+m, sd, k = avg_time_elapsed(PreconditionedConjugateGradient, 10, A, x0, b, RR)
+print('PCG ridge with gamma={}, {} iterations: {:.2e} ± {:.2e}'.format(g, k, m, sd))
