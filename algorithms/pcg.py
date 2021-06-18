@@ -4,7 +4,7 @@ import numpy as np
 from scipy.sparse.linalg import spsolve
 
 
-def ConjugateGradient(A, x0, b, tol=1.e-10, max_iter=200):
+def ConjugateGradient(A, x0, b, tol=1.e-10, max_iter=2000):
     start = process_time()
     r = b - A.dot(x0)
     p = r
@@ -25,7 +25,7 @@ def ConjugateGradient(A, x0, b, tol=1.e-10, max_iter=200):
     return x, k, np.array(res), process_time() - start
 
 
-def PreconditionedConjugateGradient(A, x0, b, P, tol=1.e-10, max_iter=200):
+def PreconditionedConjugateGradient(A, x0, b, P, tol=1.e-10, max_iter=3000):
     start = process_time()
     n = A.shape[0]
     r = b - A.dot(x0)

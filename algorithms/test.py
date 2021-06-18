@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import scipy.sparse as sps
 
 from Meeting01.Copy_of_ReadInIASI import readIASIfun
@@ -39,18 +40,24 @@ print('\n Time for compute cholesky is: {}\n'.format(end))
 
 
 # Preconditioner for ridge regression
+# gamma value for sub-matrix?
 start = process_time()
 gamma = np.arange(0.001, 0.2, 0.001)
 record = []
 for g in gamma:
     RR = sps.csr_matrix(g * np.identity(n))
-    m, sd, k = avg_time_elapsed(PreconditionedConjugateGradient, 10, A, x0, b, RR)
+    m, sd, k = avg_time_elapsed(PreconditionedConjugateGradient, 1, A, x0, b, RR)
     record.append(m)
 
 g = np.min(record)
 RR = sps.csr_matrix(g * np.identity(n))
 end = process_time() - start
 print('\n Time for compute ridge is: {}\n'.format(end))
+plt.plot(gamma, record)
+plt.title('gamma against time')
+plt.xlabel('gamma value')
+plt.ylabel('time taken')
+plt.show()
 
 
 print('\nAvg Time Elapsed of solving the system\n')
@@ -71,4 +78,10 @@ print('PCG cholesky with {} iterations: {:.2e} ± {:.2e}'.format(k, m, sd))
 
 # Try ridge regression
 m, sd, k = avg_time_elapsed(PreconditionedConjugateGradient, 10, A, x0, b, RR)
-print('PCG ridge with gamma={}, {} iterations: {:.2e} ± {:.2e}'.format(g, k, m, sd))
+print('PCG ridge with gamma={:.2e}, {} iterations: {:.2e} ± {:.2e}'.format(g, k, m, sd))
+
+
+# sub-problem
+def extract_sub_matrix(A, rows, cols):
+    result = A[rows, cols]
+    return result
