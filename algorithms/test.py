@@ -24,64 +24,57 @@ def avg_time_elapsed(method, iterations, *argv):
     return np.mean(elapsed_time), np.std(elapsed_time), np.mean(number_of_iterations)
 
 
-print('\nAvg Time Elapsed of computing the preconditioner\n')
-# diagonal preconditioner
-start = process_time()
-D = sps.diags(A.diagonal(), format='csr')
-end = process_time() - start
-print('\n Time for compute diagonal is: {}\n'.format(end))
+if __name__ == '__main__':
+    print('\nAvg Time Elapsed of computing the preconditioner\n')
+    # diagonal preconditioner
+    start = process_time()
+    D = sps.diags(A.diagonal(), format='csr')
+    end = process_time() - start
+    print('\n Time for compute diagonal is: {}\n'.format(end))
 
+    # preconditioner for incomplete cholesky
+    start = process_time()
+    T = sps.csr_matrix(facto_cholesky_incomplete(A))
+    end = process_time() - start
+    print('\n Time for compute cholesky is: {}\n'.format(end))
 
-# preconditioner for incomplete cholesky
-start = process_time()
-T = sps.csr_matrix(facto_cholesky_incomplete(A))
-end = process_time() - start
-print('\n Time for compute cholesky is: {}\n'.format(end))
+    # Preconditioner for ridge regression
+    # gamma value for sub-matrix?
+    start = process_time()
+    gamma = np.arange(0.001, 0.2, 0.001)
+    record = []
+    for g in gamma:
+        RR = sps.csr_matrix(g * np.identity(n))
+        m, sd, k = avg_time_elapsed(PreconditionedConjugateGradient, 1, A, x0, b, RR)
+        record.append(m / k)
 
-
-# Preconditioner for ridge regression
-# gamma value for sub-matrix?
-start = process_time()
-gamma = np.arange(0.001, 0.2, 0.001)
-record = []
-for g in gamma:
+    g = gamma[np.argmin(record)]
     RR = sps.csr_matrix(g * np.identity(n))
-    m, sd, k = avg_time_elapsed(PreconditionedConjugateGradient, 1, A, x0, b, RR)
-    record.append(m)
+    end = process_time() - start
+    print('\n Time for compute ridge is: {}\n'.format(end))
+    plt.plot(gamma, record)
+    plt.title('gamma against time per iteration')
+    plt.xlabel('gamma value')
+    plt.ylabel('time taken per iteration')
+    plt.show()
 
-g = np.min(record)
-RR = sps.csr_matrix(g * np.identity(n))
-end = process_time() - start
-print('\n Time for compute ridge is: {}\n'.format(end))
-plt.plot(gamma, record)
-plt.title('gamma against time')
-plt.xlabel('gamma value')
-plt.ylabel('time taken')
-plt.show()
+    print('\nAvg Time Elapsed of solving the system using full matrix\n')
+    # Basic cg method
+    m, sd, k = avg_time_elapsed(ConjugateGradient, 10, A, x0, b)
+    print('CG with {} iterations:  {:.2e} ± {:.2e}'.format(k, m, sd))
+    print('CG time per iteration :{:.2e}'.format(m / k))
 
+    # Try using diagonal as preconditioner
+    m, sd, k = avg_time_elapsed(PreconditionedConjugateGradient, 10, A, x0, b, D)
+    print('PCG diagonal with {} iterations: {:.2e} ± {:.2e}'.format(k, m, sd))
+    print('PCG diagonal time per iteration :{:.2e}'.format(m / k))
 
-print('\nAvg Time Elapsed of solving the system\n')
-# Basic cg method
-m, sd, k = avg_time_elapsed(ConjugateGradient, 10, A, x0, b)
-print('CG with {} iterations:  {:.2e} ± {:.2e}'.format(k, m, sd))
+    # Try using incomplete cholesky as preconditioner
+    m, sd, k = avg_time_elapsed(PreconditionedConjugateGradient, 10, A, x0, b, T)
+    print('PCG cholesky with {} iterations: {:.2e} ± {:.2e}'.format(k, m, sd))
+    print('PCG cholesky time per iteration :{:.2e}'.format(m / k))
 
-
-# Try using diagonal as preconditioner
-m, sd, k = avg_time_elapsed(PreconditionedConjugateGradient, 10, A, x0, b, D)
-print('PCG diagonal with {} iterations: {:.2e} ± {:.2e}'.format(k, m, sd))
-
-
-# Try using incomplete cholesky as preconditioner
-m, sd, k = avg_time_elapsed(PreconditionedConjugateGradient, 10, A, x0, b, T)
-print('PCG cholesky with {} iterations: {:.2e} ± {:.2e}'.format(k, m, sd))
-
-
-# Try ridge regression
-m, sd, k = avg_time_elapsed(PreconditionedConjugateGradient, 10, A, x0, b, RR)
-print('PCG ridge with gamma={:.2e}, {} iterations: {:.2e} ± {:.2e}'.format(g, k, m, sd))
-
-
-# sub-problem
-def extract_sub_matrix(A, rows, cols):
-    result = A[rows, cols]
-    return result
+    # Try ridge regression
+    m, sd, k = avg_time_elapsed(PreconditionedConjugateGradient, 10, A, x0, b, RR)
+    print('PCG ridge with gamma={:.2e}, {} iterations: {:.2e} ± {:.2e}'.format(g, k, m, sd))
+    print('PCG ridge time per iteration :{:.2e}'.format(m / k))
