@@ -24,6 +24,7 @@ def avg_time_elapsed(method, iterations, *argv):
     return np.mean(elapsed_time), np.std(elapsed_time), np.mean(number_of_iterations)
 
 
+# Consider both time & time/iteration
 if __name__ == '__main__':
     print('\nAvg Time Elapsed of computing the preconditioner\n')
     # diagonal preconditioner
@@ -78,3 +79,4 @@ if __name__ == '__main__':
     m, sd, k = avg_time_elapsed(PreconditionedConjugateGradient, 10, A, x0, b, RR)
     print('PCG ridge with gamma={:.2e}, {} iterations: {:.2e} ± {:.2e}'.format(g, k, m, sd))
     print('PCG ridge time per iteration :{:.2e}'.format(m / k))
+

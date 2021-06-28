@@ -24,7 +24,11 @@ diagonal = []
 cholesky = []
 ridge = []
 
+# threshold for finding sub-matrix / compute directly
+# how the hyper-parameters varied
+
 for size in range(5, A.shape[0], 20):
+    print('attempt!!!!!!!!!!!!!!!!')
     print(size)
     row = random.sample(range(0, A.shape[0]-1), size)
     col = random.sample(range(0, A.shape[0]-1), size)
