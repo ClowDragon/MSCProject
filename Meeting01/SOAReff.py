@@ -17,11 +17,11 @@ def SOAReff(n=100, L=0.5, a=1, maxval=None, multval=None, ridgeval=None):
 
     # circle for the value of n specified
     # 2*pi/n*(abs(i-l))
-    v = np.zeros((1, n))
+    v = np.zeros(n)
     # SOAReff.m:15
     vtemp = np.zeros(maxval)
     # SOAReff.m:16
-    for l in range(1, maxval):
+    for l in range(maxval):
         # calculates the 'great circle' distance between the two points we
         # are looking at
         thetaj = theta * abs(1 - l)
@@ -33,10 +33,10 @@ def SOAReff(n=100, L=0.5, a=1, maxval=None, multval=None, ridgeval=None):
     # SOAReff.m:24
     v[:maxval] = vtemp
     # SOAReff.m:25
-    v = [[v[0][0]] + vtemp[:0:-1]]
+    v = [v[0]] + vtemp[::-1][:-1].tolist()
     # SOAReff.m:26
     # C = gallery('circul',v);
-    C = toeplitz([v[0]] + v[-1:0:-1], v)
+    C = toeplitz([v[0]] + v[::-1][:-1], v)
     # SOAReff.m:29
     if C[0, 1] - C[1, 0] != 0:
         C = C + C.conj()
@@ -45,11 +45,11 @@ def SOAReff(n=100, L=0.5, a=1, maxval=None, multval=None, ridgeval=None):
     cval, _ = eigs(C, 1, which='SR')
     # SOAReff.m:33
     if cval < 0:
-        C = C + (abs(cval) + 0.5 * np.random.rand()) * np.eye(n-1)
+        C = C + (abs(cval) + 0.5 * np.random.rand()) * np.eye(n)
     # SOAReff.m:35
 
     return sparse.csr_matrix(C)
 
 
 if __name__ == '__main__':
-    pass
+    SOAReff(3, 0.3, 1, 3, 1, 0)
