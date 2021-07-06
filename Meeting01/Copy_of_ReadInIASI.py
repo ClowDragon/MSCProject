@@ -151,24 +151,22 @@ def readIASIfun():
     return CorrSub, CovSub, sigmaSub
 
 
-'''
 CorrSub, CovSub, sigmaSub = readIASIfun()
 
+if __name__ == '__main__':
+    df_cm = pd.DataFrame(CorrSub, range(137), range(137))
+    # plt.figure(figsize=(10,7))
+    corr = df_cm.corr()
+    ax = sn.heatmap(
+        corr,
+        vmin=-1, vmax=1, center=0,
+        cmap=sn.diverging_palette(20, 220, n=200),
+        square=True
+    )
+    ax.set_xticklabels(
+        ax.get_xticklabels(),
+        rotation=45,
+        horizontalalignment='right'
+    )
 
-df_cm = pd.DataFrame(CorrSub, range(137), range(137))
-# plt.figure(figsize=(10,7))
-corr = df_cm.corr()
-ax = sn.heatmap(
-    corr,
-    vmin=-1, vmax=1, center=0,
-    cmap=sn.diverging_palette(20, 220, n=200),
-    square=True
-)
-ax.set_xticklabels(
-    ax.get_xticklabels(),
-    rotation=45,
-    horizontalalignment='right'
-)
-
-plt.show()
-'''
+    plt.show()
